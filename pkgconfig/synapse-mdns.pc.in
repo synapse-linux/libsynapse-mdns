@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: MIT
+prefix=@PREFIX@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
+
+Name: libsynapse-mdns
+Description: Policy-free Synapse mDNS observations and publication over Avahi
+Version: @VERSION@
+Libs: -L${libdir} -lsynapse-mdns
+Libs.private: -lavahi-client -lavahi-common
+Cflags: -I${includedir}
