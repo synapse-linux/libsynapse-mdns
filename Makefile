@@ -33,8 +33,13 @@ STATIC_TEST = $(BUILD_DIR)/public-api-static
 FIXTURE = $(BUILD_DIR)/mdns-fixture
 PILOT = $(BUILD_DIR)/mdns-pilot
 WRONG = $(BUILD_DIR)/wrong-major/libsynapse-mdns.so.$(SOVERSION)
+CPU_PROBE = $(BUILD_DIR)/isa-cpu
+ISA_EMULATOR ?=
+ISA_SYSROOT ?=
+ISA_LIBRARY_PATH ?=
+ISA_EXECUTION_ARGS = $(if $(strip $(ISA_EMULATOR)),--emulator "$(ISA_EMULATOR)" --sysroot "$(ISA_SYSROOT)" --cpu-probe "$(CPU_PROBE)" --library-path "$(ISA_LIBRARY_PATH)")
 
-.PHONY: all clean test sdk-test abi-test rig-build wrong-major install isa-check
+.PHONY: all clean test sdk-test abi-test isa-test rig-build wrong-major install isa-check
 all: $(SHARED) $(STATIC) $(PC)
 
 $(BUILD_DIR):
@@ -74,7 +79,10 @@ abi-test: all
 sdk-test: all
 	CC="$(CC)" TEST_CFLAGS="$(BASE_CFLAGS) $(CFLAGS)" TEST_LDFLAGS="$(BASE_LDFLAGS) $(LDFLAGS)" python3 -I -B tests/sdk.py "$(abspath $(BUILD_DIR))"
 
-test: $(PUBLIC_TEST) $(STATIC_TEST) $(FIXTURE) abi-test sdk-test
+isa-test:
+	python3 -I -B tests/isa-fixture.py
+
+test: $(PUBLIC_TEST) $(STATIC_TEST) $(FIXTURE) abi-test sdk-test isa-test
 	"$(PUBLIC_TEST)"
 	"$(STATIC_TEST)"
 	"$(FIXTURE)"
@@ -109,9 +117,13 @@ install: all
 	install -D -m 0644 PROVENANCE.md "$(DESTDIR)$(DATADIR)/doc/libsynapse-mdns/PROVENANCE.md"
 	install -D -m 0644 docs/api.md "$(DESTDIR)$(DATADIR)/doc/libsynapse-mdns/api.md"
 
-# A source flag or an ISA-used note alone does not qualify the linked runtime.
-isa-check: $(SHARED) $(PUBLIC_TEST)
-	python3 -I -B tests/isa.py "$(SHARED)" "$(PUBLIC_TEST)"
+$(CPU_PROBE): tests/isa-cpu.c | $(BUILD_DIR)
+	$(CC) $(BASE_CPPFLAGS) $(CPPFLAGS) $(BASE_CFLAGS) $(CFLAGS) -fPIE -o "$@" "$<" -pie $(BASE_LDFLAGS) $(LDFLAGS)
+
+# ELF DSO and PIE notes differ. Undeclared DSO needs explicit isolated baseline
+# execution; ISA-used/source flags alone never produce runtime qualification.
+isa-check: $(SHARED) $(PUBLIC_TEST) $(STATIC_TEST) $(FIXTURE) $(CPU_PROBE)
+	python3 -I -B tests/isa.py $(ISA_EXECUTION_ARGS) "$(SHARED)" "$(PUBLIC_TEST)" "$(STATIC_TEST)" "$(FIXTURE)"
 
 clean:
 	rm -rf "$(BUILD_DIR)"

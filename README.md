@@ -35,11 +35,13 @@ fallback. `make rig-build` builds an opt-in finite test consumer; it is never
 run or installed by normal tests. `make wrong-major` produces a deliberately
 faulty test library only, never an installed artifact.
 
-`make isa-check` is a separate linked-artifact qualification gate. Compiler
-baseline flags and ISA-used notes do not prove runtime requirements; rolling
-host CRT/dependencies can still demand higher ISA. No unsupported architecture
-or missing note is silently treated as target qualification. Physical network
-rigs, target ISA, packaging and release acceptance remain distinct.
+`make isa-check` is a separate [type-aware linked-artifact ISA gate](docs/isa.md).
+Compiler flags/ISA-used alone do not qualify runtime; rolling host CRT/dependencies
+can demand higher ISA. A DSO lacking ISA-needed requires explicit isolated
+baseline execution, a capability probe and a hash-matched consumer/producer;
+missing executable notes and v2+ needs still fail closed. No emulator is downloaded
+or run implicitly. CPU-path evidence, physical target/network acceptance,
+packaging and release remain distinct.
 
 ## Source lifecycle
 
