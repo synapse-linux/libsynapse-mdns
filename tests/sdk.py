@@ -14,8 +14,13 @@ ldflags = shlex.split(os.environ.get("TEST_LDFLAGS", ""))
 with tempfile.TemporaryDirectory(prefix="synapse-mdns-sdk-") as temporary:
     root = Path(temporary)
     stage = root / "stage"
+    # Python closes a parent's pipe-jobserver descriptors (GNU Make 4.3).
+    # This independent staged install must not inherit inaccessible job tokens.
+    install_env = dict(os.environ)
+    for name in ("MAKEFLAGS", "MFLAGS", "MAKEOVERRIDES"):
+        install_env.pop(name, None)
     subprocess.run(["make", "--no-print-directory", "install", "BUILD_DIR=" + str(build),
-                    "DESTDIR=" + str(stage), "PREFIX=/usr"], check=True)
+                    "DESTDIR=" + str(stage), "PREFIX=/usr"], env=install_env, check=True)
     env = dict(os.environ, PKG_CONFIG_SYSROOT_DIR=str(stage),
                PKG_CONFIG_LIBDIR=str(stage / "usr/lib/pkgconfig"), PKG_CONFIG_PATH="")
     pc = shlex.split(os.environ.get("PKG_CONFIG", "pkg-config"))

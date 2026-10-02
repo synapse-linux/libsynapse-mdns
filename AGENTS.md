@@ -25,5 +25,11 @@ authoritative registry or image-inclusion decision.
 - Validate strict GCC/Clang, public shared/static SDK consumption, symbols/ABI,
   staged installation, dependency refusals, ASan/UBSan, analyzers, reproducibility,
   hardening and per-artifact target ISA before a release/packaging claim.
+- Required CPU targets include x86-64/Strix Halo and DGX Spark (GB10, Linux
+  AArch64 little-endian LP64). Build separate binaries; preserve the public API1
+  boundary. x86-64 ISA gates never qualify ARM64. The explicit native dgx-check
+  is target/path evidence, not an all-Arm baseline or physical-network proof.
+  Do not acquire GPU/engine authority or disturb existing services to qualify
+  this CPU-only library. See docs/targets.md.
 - make install must be exercised with nonempty DESTDIR, not on the live host.
   Source, staging, packaging and live deployment are separate transitions.
