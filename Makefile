@@ -17,7 +17,8 @@ CFLAGS ?=
 LDFLAGS ?=
 LDLIBS ?=
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
-ARCH_CFLAGS := $(if $(findstring x86_64,$(TARGET_MACHINE)),-march=x86-64 -mtune=generic)
+# Select the compiler target, not the build host. Runtime qualification is separate.
+ARCH_CFLAGS := $(if $(findstring x86_64,$(TARGET_MACHINE)),-march=x86-64 -mtune=generic,$(if $(findstring aarch64,$(TARGET_MACHINE)),-march=armv8-a -mtune=generic))
 ISA_NOTE := $(shell $(CC) -c -x c -Wa,-mx86-used-note=yes -o /dev/null /dev/null 2>/dev/null && echo -Wa,-mx86-used-note=yes)
 BASE_CPPFLAGS = -D_FORTIFY_SOURCE=3
 BASE_CFLAGS = -O2 -g -std=c17 -Wall -Wextra -Wpedantic -Werror -fstack-protector-strong $(ARCH_CFLAGS) $(ISA_NOTE)
@@ -39,7 +40,7 @@ ISA_SYSROOT ?=
 ISA_LIBRARY_PATH ?=
 ISA_EXECUTION_ARGS = $(if $(strip $(ISA_EMULATOR)),--emulator "$(ISA_EMULATOR)" --sysroot "$(ISA_SYSROOT)" --cpu-probe "$(CPU_PROBE)" --library-path "$(ISA_LIBRARY_PATH)")
 
-.PHONY: all clean test sdk-test abi-test isa-test rig-build wrong-major install isa-check
+.PHONY: all clean test sdk-test abi-test isa-test build-flags-test target-test dgx-check rig-build wrong-major install isa-check
 all: $(SHARED) $(STATIC) $(PC)
 
 $(BUILD_DIR):
@@ -71,7 +72,7 @@ $(BUILD_DIR)/mdns-test.o: src/mdns.c include/synapse/mdns.h Makefile | $(BUILD_D
 	$(CC) $(BASE_CPPFLAGS) $(CPPFLAGS) $(BASE_CFLAGS) $(CFLAGS) -Dclock_gettime=synapse_mdns_test_clock -Iinclude $(AVAHI_CFLAGS) -c -o "$@" "$<"
 
 $(FIXTURE): tests/mdns-fixture.c $(BUILD_DIR)/mdns-test.o include/synapse/mdns.h
-	$(CC) $(BASE_CPPFLAGS) $(CPPFLAGS) $(BASE_CFLAGS) $(CFLAGS) -fPIE -Iinclude -o "$@" "$<" $(BUILD_DIR)/mdns-test.o -lavahi-common -pie $(BASE_LDFLAGS) $(LDFLAGS)
+	$(CC) $(BASE_CPPFLAGS) $(CPPFLAGS) $(BASE_CFLAGS) $(CFLAGS) -fPIE -Iinclude $(AVAHI_CFLAGS) -o "$@" "$<" $(BUILD_DIR)/mdns-test.o -lavahi-common -pie $(BASE_LDFLAGS) $(LDFLAGS)
 
 abi-test: all
 	python3 -I -B tests/abi.py "$(SHARED)"
@@ -82,7 +83,13 @@ sdk-test: all
 isa-test:
 	python3 -I -B tests/isa-fixture.py
 
-test: $(PUBLIC_TEST) $(STATIC_TEST) $(FIXTURE) abi-test sdk-test isa-test
+build-flags-test:
+	python3 -I -B tests/build-flags.py
+
+target-test:
+	python3 -I -B tests/target-fixture.py
+
+test: $(PUBLIC_TEST) $(STATIC_TEST) $(FIXTURE) abi-test sdk-test isa-test build-flags-test target-test
 	"$(PUBLIC_TEST)"
 	"$(STATIC_TEST)"
 	"$(FIXTURE)"
@@ -124,6 +131,11 @@ $(CPU_PROBE): tests/isa-cpu.c | $(BUILD_DIR)
 # execution; ISA-used/source flags alone never produce runtime qualification.
 isa-check: $(SHARED) $(PUBLIC_TEST) $(STATIC_TEST) $(FIXTURE) $(CPU_PROBE)
 	python3 -I -B tests/isa.py $(ISA_EXECUTION_ARGS) "$(SHARED)" "$(PUBLIC_TEST)" "$(STATIC_TEST)" "$(FIXTURE)"
+
+# Explicit native ARM64/GB10 artifact gate. It does not acquire Avahi, a GPU or
+# an engine lease and does not relabel native execution as Armv8-A baseline proof.
+dgx-check: $(SHARED) $(PUBLIC_TEST) $(STATIC_TEST) $(FIXTURE)
+	python3 -I -B tests/target.py --profile dgx-spark "$(SHARED)" "$(PUBLIC_TEST)" "$(STATIC_TEST)" "$(FIXTURE)"
 
 clean:
 	rm -rf "$(BUILD_DIR)"

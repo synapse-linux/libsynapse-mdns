@@ -4,6 +4,10 @@
 CPU requirements belong to the produced artifact and its runtime, not the build
 host's flags. A rolling optimized host is not the baseline target SDK. Retain
 negative receipts rather than overwriting them with a build/suite success.
+This gate is x86-64-only; DGX Spark is a separate mandatory Linux AArch64 target
+with [native artifact and physical qualification](targets.md). Do not run a
+CPUID probe on ARM, relabel ARM's absent x86 properties or transfer an x86-64
+baseline receipt to ARM64 bytes.
 
 ## ELF properties are different evidence
 

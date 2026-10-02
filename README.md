@@ -13,7 +13,7 @@ source without rewriting its history. Public **API/ABI major 1** uses
 
 Source development only: no packaging, system installation, deployment, tag,
 accepted release or ISO inclusion is authorized.
-Synapse AI Manager remains planning-only; this dependency does not implement it.
+This dependency does not implement an AI manager, engine, launcher or registry.
 
 ## Build and isolated SDK validation
 
@@ -35,7 +35,20 @@ fallback. `make rig-build` builds an opt-in finite test consumer; it is never
 run or installed by normal tests. `make wrong-major` produces a deliberately
 faulty test library only, never an installed artifact.
 
-`make isa-check` is a separate [type-aware linked-artifact ISA gate](docs/isa.md).
+## Required target matrix
+
+The owner requires both x86-64 (including Strix Halo) and **DGX Spark / GB10
+Linux AArch64**. They use the same source, public API/ABI major and SONAME, but
+separate architecture-specific binaries and native C ABIs. An x86-64 binary or
+its baseline receipt does not qualify ARM64. No CUDA/GPU runtime is required.
+
+Compiler-target flags are conservative: x86-64 uses `-march=x86-64`, AArch64
+uses `-march=armv8-a`; neither selects `native`. See [DGX qualification](docs/targets.md)
+for the explicit native artifact gate, missing-development-file staging and
+physical cross-architecture mDNS acceptance. `make test` includes network-free
+compiler-target/refusal regressions, never a hardware or LAN qualification.
+
+`make isa-check` is a separate **x86-64-only** [type-aware linked-artifact ISA gate](docs/isa.md).
 Compiler flags/ISA-used alone do not qualify runtime; rolling host CRT/dependencies
 can demand higher ISA. A DSO lacking ISA-needed requires explicit isolated
 baseline execution, a capability probe and a hash-matched consumer/producer;
@@ -45,7 +58,8 @@ packaging and release remain distinct.
 
 ## Source lifecycle
 
-Bootstrap is on `develop`; implementation lives on `feature/mdns-extraction`.
+Bootstrap and qualified extraction are integrated on `develop`; feature history
+is retained. DGX target work starts from develop on `feature/arm64-mdns`.
 No `main` release history exists yet. See [AGENTS.md](AGENTS.md) and
 [PROVENANCE.md](PROVENANCE.md). The library is independent of libsynapse-core;
 network acquisition does not enter that libc-only support library.
