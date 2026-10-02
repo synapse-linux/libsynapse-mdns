@@ -1,0 +1,13 @@
+/* SPDX-License-Identifier: MIT */
+SYNAPSE_MDNS_1.0 {
+    global:
+        synapse_mdns_api_major;
+        synapse_mdns_browse;
+        synapse_mdns_txt_next;
+        synapse_mdns_txt_value;
+        synapse_mdns_publish_start;
+        synapse_mdns_publish_iterate;
+        synapse_mdns_publish_state;
+        synapse_mdns_publish_stop;
+    local: *;
+};
