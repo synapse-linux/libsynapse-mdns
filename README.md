@@ -62,6 +62,8 @@ packaging and release remain distinct.
 
 Bootstrap, extraction and DGX qualification are integrated on `develop`; feature
 history is retained. The authorized first-release candidate is on
-`release/0.1.0-alpha.1`; no signed tag, accepted `main` release or public source
-repository exists yet. See [AGENTS.md](AGENTS.md) and [PROVENANCE.md](PROVENANCE.md). The library is independent of libsynapse-core;
-network acquisition does not enter that libc-only support library.
+`release/0.1.0-alpha.1`; no signed tag or accepted `main` release exists yet.
+The public source repository is <https://github.com/synapse-linux/libsynapse-mdns>.
+See [AGENTS.md](AGENTS.md) and [PROVENANCE.md](PROVENANCE.md). The library is
+independent of libsynapse-core; network acquisition does not enter that libc-only
+support library.
