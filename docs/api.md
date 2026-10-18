@@ -1,11 +1,12 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Public API/ABI 1
 
-Candidate source version: `0.1.0-alpha.1`. Installed header:
+Release-candidate source version: `0.1.0-alpha.1`. Installed header:
 `<synapse/mdns.h>`. pkg-config module: `synapse-mdns`. Dynamic SONAME:
 `libsynapse-mdns.so.1`; eight public symbols under `SYNAPSE_MDNS_1.0`.
-A static archive is also built. This alpha feature is not an accepted release
-or package; a staged SDK is a validation artifact, not a deployed dependency.
+A static archive is also built. The public API/ABI 1 contract is accepted for
+this alpha release candidate; source signing/publication, native packages and
+deployment remain separate transitions. A staged SDK is not a deployed dependency.
 
 ## Compatibility
 

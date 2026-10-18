@@ -54,5 +54,6 @@ with tempfile.TemporaryDirectory(prefix="synapse-mdns-sdk-") as temporary:
     subprocess.run([str(root / "consumer-cpp")], env=runtime, check=True)
     header = stage / "usr/include/synapse/mdns.h"
     assert header.exists() and not list(stage.rglob("*.c")), "SDK must not install implementation/test source"
+    assert (stage / "usr/share/doc/libsynapse-mdns/CHANGELOG.md").is_file(), "release changelog must be installed"
     assert (stage / "usr/lib/libsynapse-mdns.so").resolve().name == "libsynapse-mdns.so.1.0.0"
 print("isolated SDK: pkg-config, external C shared/static and C++ consumers, no private source: OK")

@@ -123,6 +123,7 @@ install: all
 	install -D -m 0644 README.md "$(DESTDIR)$(DATADIR)/doc/libsynapse-mdns/README.md"
 	install -D -m 0644 PROVENANCE.md "$(DESTDIR)$(DATADIR)/doc/libsynapse-mdns/PROVENANCE.md"
 	install -D -m 0644 docs/api.md "$(DESTDIR)$(DATADIR)/doc/libsynapse-mdns/api.md"
+	install -D -m 0644 CHANGELOG.md "$(DESTDIR)$(DATADIR)/doc/libsynapse-mdns/CHANGELOG.md"
 
 $(CPU_PROBE): tests/isa-cpu.c | $(BUILD_DIR)
 	$(CC) $(BASE_CPPFLAGS) $(CPPFLAGS) $(BASE_CFLAGS) $(CFLAGS) -fPIE -o "$@" "$<" -pie $(BASE_LDFLAGS) $(LDFLAGS)

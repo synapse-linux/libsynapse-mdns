@@ -11,9 +11,11 @@ source without rewriting its history. Public **API/ABI major 1** uses
 `<synapse/mdns.h>`, pkg-config `synapse-mdns` and SONAME
 `libsynapse-mdns.so.1`. See [the API contract](docs/api.md).
 
-Source development only: no packaging, system installation, deployment, tag,
-accepted release or ISO inclusion is authorized.
-This dependency does not implement an AI manager, engine, launcher or registry.
+Release candidate `0.1.0-alpha.1` is undergoing authorized release preparation.
+API/ABI 1 and native target qualification are recorded; signing, immutable source
+publication, packages and controlled target installation remain separate gates.
+No automatic ISO/image inclusion is implied. This library is not a daemon or
+registry; it does not implement an AI manager, engine or launcher.
 
 ## Build and isolated SDK validation
 
@@ -58,8 +60,8 @@ packaging and release remain distinct.
 
 ## Source lifecycle
 
-Bootstrap and qualified extraction are integrated on `develop`; feature history
-is retained. DGX target work starts from develop on `feature/arm64-mdns`.
-No `main` release history exists yet. See [AGENTS.md](AGENTS.md) and
-[PROVENANCE.md](PROVENANCE.md). The library is independent of libsynapse-core;
+Bootstrap, extraction and DGX qualification are integrated on `develop`; feature
+history is retained. The authorized first-release candidate is on
+`release/0.1.0-alpha.1`; no signed tag, accepted `main` release or public source
+repository exists yet. See [AGENTS.md](AGENTS.md) and [PROVENANCE.md](PROVENANCE.md). The library is independent of libsynapse-core;
 network acquisition does not enter that libc-only support library.
